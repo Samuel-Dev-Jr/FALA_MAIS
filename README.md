@@ -1,44 +1,45 @@
 # Fala Mais
 
-Projeto da UC5 – Banco de Dados (Dev Full Stack – SENAC).
+**Cliente:** Escola de Idiomas Fala Mais · Projeto da UC5 – Banco de Dados (Dev Full Stack – SENAC)
 
-> Descreva aqui, em 2 ou 3 frases, o que é o sistema e qual problema ele resolve.
+Sistema que junta em um banco de dados só o que a escola controlava em planilhas separadas: alunos, cursos, turmas, matrículas, aulas, presença e notas.
+
+## Integrantes
+
+- Nome – função
 
 ## Estrutura
 
 ```
 fala-mais/
-├── README.md
-├── .gitignore
 ├── docs/
 │   ├── requisitos.md
-│   ├── conceitual.png      (+ conceitual.drawio)
-│   ├── logico.md
+│   ├── modelo-conceitual.png   (+ .drawio)
+│   ├── modelo-logico.png       (+ .drawio)
 │   ├── documentacao-tecnica.md
-│   └── apresentacao.pdf
+│   └── apresentacao-cliente.pdf
 ├── database/
 │   ├── 01-create.sql
 │   ├── 02-inserts.sql
 │   └── 03-consultas.sql
-└── backend/
-    ├── .env.example
-    ├── package.json
-    └── src/
-        ├── db.js
-        └── server.js
+├── backend/
+│   ├── .env.example
+│   └── src/...
+└── README.md
 ```
 
 ## Como rodar
 
-### 1. Banco de dados (MySQL)
+### 1. Banco de dados
 
-Execute os scripts **na ordem**, pelo MySQL Workbench ou pelo terminal:
+Com o MySQL ligado no XAMPP, rode na ordem (phpMyAdmin, MySQL Workbench ou terminal):
 
 ```bash
 mysql -u root -p < database/01-create.sql
 mysql -u root -p < database/02-inserts.sql
-mysql -u root -p < database/03-consultas.sql
 ```
+
+Os relatórios do cliente estão em `database/03-consultas.sql`.
 
 ### 2. Backend (Node.js)
 
@@ -56,14 +57,8 @@ npm run dev
 
 A API sobe em `http://localhost:3000`. Para testar a conexão com o banco, acesse `http://localhost:3000/health`.
 
-## Documentação
+## Ferramentas e créditos
 
-- [Requisitos](docs/requisitos.md)
-- [Modelo conceitual](docs/conceitual.png)
-- [Modelo lógico](docs/logico.md)
-- [Documentação técnica](docs/documentacao-tecnica.md)
-- [Apresentação](docs/apresentacao.pdf)
-
-## Equipe
-
-- Nome – função
+- MySQL (XAMPP), Node.js, Express, mysql2 e dotenv.
+- Diagramas no formato do draw.io.
+- Parte dos documentos, dos scripts SQL e dos diagramas foi feita com ajuda do Claude (IA da Anthropic).
