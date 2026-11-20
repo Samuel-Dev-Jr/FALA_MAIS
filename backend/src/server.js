@@ -17,7 +17,10 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// Adicione aqui as rotas do projeto.
+// Rotas da API.
+app.use('/alunos', require('./routes/alunos'));
+app.use('/turmas', require('./routes/turmas'));
+app.use('/usuarios', require('./routes/usuarios'));
 
 const PORT = process.env.PORT || 3000;
 
