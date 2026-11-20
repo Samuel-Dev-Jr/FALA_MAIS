@@ -17,10 +17,16 @@ app.get('/health', async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 // Rotas da API.
 app.use('/alunos', require('./routes/alunos'));
 app.use('/turmas', require('./routes/turmas'));
 app.use('/usuarios', require('./routes/usuarios'));
+=======
+// Adicione aqui as rotas do projeto.
+app.use('/cursos', require('./routes/cursos'));
+app.use('/matriculas', require('./routes/matriculas'));
+>>>>>>> cce969ea37ec398e318e8c02f0e208bdfd977e99
 
 const PORT = process.env.PORT || 3000;
 
