@@ -1,20 +1,15 @@
--- Fala Mais - criação do banco de dados
-
 SET NAMES utf8mb4;
 
--- Apago o banco se ele já existir, para o script sempre rodar do zero.
 DROP DATABASE IF EXISTS fala_mais;
 CREATE DATABASE fala_mais CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE fala_mais;
 
--- Perfis de acesso: secretaria, professor e coordenação.
 CREATE TABLE perfis (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(30) NOT NULL UNIQUE,
   descricao VARCHAR(150)
 );
 
--- Funcionários. São os únicos que fazem login, e eu guardo só o hash da senha.
 CREATE TABLE usuarios (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
@@ -26,7 +21,6 @@ CREATE TABLE usuarios (
   FOREIGN KEY (perfil_id) REFERENCES perfis(id)
 );
 
--- Alunos não fazem login. O responsável só é preenchido para menores de idade.
 CREATE TABLE alunos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
@@ -45,7 +39,6 @@ CREATE TABLE cursos (
   carga_horaria SMALLINT NOT NULL
 );
 
--- Cada turma tem um curso e um único professor.
 CREATE TABLE turmas (
   id INT AUTO_INCREMENT PRIMARY KEY,
   curso_id INT NOT NULL,
@@ -60,8 +53,6 @@ CREATE TABLE turmas (
   FOREIGN KEY (professor_id) REFERENCES usuarios(id)
 );
 
--- A matrícula liga o aluno à turma (N:N). O UNIQUE não deixa o aluno entrar duas vezes
--- na mesma turma. Quando cancelo, não apago: só mudo a situação.
 CREATE TABLE matriculas (
   id INT AUTO_INCREMENT PRIMARY KEY,
   aluno_id INT NOT NULL,
@@ -82,7 +73,6 @@ CREATE TABLE aulas (
   FOREIGN KEY (turma_id) REFERENCES turmas(id)
 );
 
--- Uma linha para cada aluno em cada aula (N:N entre matrículas e aulas).
 CREATE TABLE presencas (
   aula_id INT NOT NULL,
   matricula_id INT NOT NULL,

@@ -1,6 +1,3 @@
-// =====================================================
-// ROTA DE LOGIN
-// =====================================================
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -8,7 +5,6 @@ const pool = require('../db');
 
 const router = express.Router();
 
-// POST /login -> confere e-mail e senha e devolve um token
 router.post('/login', async (req, res) => {
   const { email, senha } = req.body;
 

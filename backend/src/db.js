@@ -1,5 +1,3 @@
-// Conexão com o MySQL.
-// Os dados vêm do arquivo .env (veja .env.example).
 const mysql = require('mysql2/promise');
 
 const pool = mysql.createPool({
@@ -13,5 +11,3 @@ const pool = mysql.createPool({
 });
 
 module.exports = pool;
-
-

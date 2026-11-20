@@ -1,79 +1,13 @@
-// =====================================================
-// ROTAS DE TURMAS (tabelas turmas, aulas e presencas)
-// =====================================================
-// Opcional para a entrega (o obrigatório está em alunos.js).
-// Aqui ficam as turmas, o lançamento de aula com presença e os relatórios 1 a 4.
-// No server.js: app.use('/turmas', require('./routes/turmas'));
-//
-// Regra importante ("só vê o que é seu"):
-//   o professor só pode mexer nas turmas dele. Quem é o dono da turma é a
-//   coluna turmas.professor_id. Se quem chamou é professor, eu filtro com
-//   WHERE professor_id = <id de quem está logado>. Esse id vem do login,
-//   nunca de algo que a pessoa digita.
-//
-// -----------------------------------------------------
-// GET /turmas?semestre=2026-2  →  relatório 2 (turmas com vagas)
-// -----------------------------------------------------
-// Lógica:
-//   1. Pego o semestre de req.query.semestre (o que vem depois do ? na URL).
-//   2. Uso a consulta 2 do database/03-consultas.sql, trocando '2026-2' por ?.
-//   3. Se quem chamou é professor, acrescento AND t.professor_id = ?.
-//   4. Devolvo a lista em JSON.
-//
-// Resposta (exemplo):
-//   [ { "turma": 3, "idioma": "Espanhol", "nivel": "Básico 1", "professor": "Carlos Méndez",
-//       "dias_semana": "ter e qui", "hora_inicio": "19:00:00", "hora_fim": "20:30:00",
-//       "vagas_restantes": 0 } ]
-//
-// -----------------------------------------------------
-// POST /turmas  →  cria uma turma (secretaria e coordenação)
-// -----------------------------------------------------
-// Corpo (exemplo):
-//   { "curso_id": 1, "professor_id": 4, "semestre": "2026-2", "dias_semana": "seg e qua",
-//     "hora_inicio": "19:00", "hora_fim": "20:30", "sala": "Sala 1", "max_alunos": 12 }
-//
-// Lógica:
-//   1. Confiro os obrigatórios. Se faltar, devolvo 400.
-//   2. Faço o INSERT com ?. Curso ou professor que não existe faz a FK dar erro:
-//      nesse caso devolvo 400.
-//   3. Devolvo 201 com o id novo.
-//
-// -----------------------------------------------------
-// GET /turmas/:id/chamada  →  relatório 1 (lista de chamada)
-// -----------------------------------------------------
-//   1. Pego o id da turma em req.params.id.
-//   2. Uso a consulta 1 do 03-consultas.sql (só matrícula ativa, em ordem alfabética).
-//   3. Devolvo também o id da matrícula: é ele que o professor usa para lançar a presença.
-//
-// -----------------------------------------------------
-// GET /turmas/:id/presenca  →  relatório 3 (só coordenação)
-// GET /turmas/:id/resultado →  relatório 4 (só coordenação)
-// -----------------------------------------------------
-//   Uso as consultas 3 e 4 do 03-consultas.sql, trocando o número da turma por ?.
-//
-// -----------------------------------------------------
-// POST /turmas/:id/aulas  →  registra uma aula com a presença (professor da turma e coordenação)
-// -----------------------------------------------------
-// Corpo (exemplo):
-//   { "data_aula": "2026-08-11", "conteudo": "Números",
-//     "presencas": [ { "matricula_id": 7, "presente": true },
-//                    { "matricula_id": 8, "presente": false } ] }
-//
-// Lógica:
-//   1. Faço o INSERT em aulas e pego o id da aula (resultado.insertId).
-//   2. Para cada item de presencas, faço um INSERT em presencas com esse id.
-//   3. Devolvo 201.
-//
-// -----------------------------------------------------
-// IMPLEMENTAÇÃO DAS ROTAS
-// -----------------------------------------------------
 const express = require('express');
 const pool = require('../db');
+const autenticar = require('../middlewares/autenticar');
+const permitir = require('../middlewares/permitir');
 
 const router = express.Router();
 
-// Consulta turmas de um semestre e limita os dados ao professor autenticado.
-router.get('/', async (req, res) => {
+router.use(autenticar);
+
+router.get('/', permitir('secretaria', 'professor', 'coordenacao'), async (req, res) => {
   const { semestre } = req.query;
 
   if (!semestre) {
@@ -107,8 +41,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Cria uma turma.
-router.post('/', async (req, res) => {
+router.post('/', permitir('secretaria', 'coordenacao'), async (req, res) => {
   const {
     curso_id,
     professor_id,
@@ -160,8 +93,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Lista de chamada de uma turma.
-router.get('/:id/chamada', async (req, res) => {
+router.get('/:id/chamada', permitir('secretaria', 'professor', 'coordenacao'), async (req, res) => {
   try {
     const [alunos] = await pool.query(
       `SELECT m.id AS matricula_id, a.nome
@@ -189,8 +121,7 @@ router.get('/:id/chamada', async (req, res) => {
   }
 });
 
-// Percentual de presença da turma.
-router.get('/:id/presenca', async (req, res) => {
+router.get('/:id/presenca', permitir('coordenacao'), async (req, res) => {
   try {
     const [presencas] = await pool.query(
       `SELECT a.nome, ROUND(SUM(p.presente) * 100 / COUNT(*), 1) AS percentual_presenca
@@ -209,8 +140,7 @@ router.get('/:id/presenca', async (req, res) => {
   }
 });
 
-// Resultado dos alunos aprovados e reprovados da turma.
-router.get('/:id/resultado', async (req, res) => {
+router.get('/:id/resultado', permitir('coordenacao'), async (req, res) => {
   try {
     const [resultado] = await pool.query(
       `SELECT m.turma_id AS turma, a.nome, m.nota_final, m.situacao
@@ -227,8 +157,7 @@ router.get('/:id/resultado', async (req, res) => {
   }
 });
 
-// Registra uma aula e a presença dos alunos matriculados.
-router.post('/:id/aulas', async (req, res) => {
+router.post('/:id/aulas', permitir('professor', 'coordenacao'), async (req, res) => {
   const { data_aula, conteudo, presencas } = req.body;
 
   if (!data_aula || !conteudo) {

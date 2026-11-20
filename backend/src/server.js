@@ -1,4 +1,3 @@
-// Carrega o .env antes de tudo, para o db.js já encontrar as variáveis.
 require('dotenv').config();
 
 const express = require('express');
@@ -7,7 +6,6 @@ const pool = require('./db');
 const app = express();
 app.use(express.json());
 
-// Verifica se a API e o banco estão respondendo.
 app.get('/health', async (req, res) => {
   try {
     await pool.query('SELECT 1');
@@ -17,16 +15,12 @@ app.get('/health', async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
-// Rotas da API.
+app.use(require('./routes/auth'));
 app.use('/alunos', require('./routes/alunos'));
-app.use('/turmas', require('./routes/turmas'));
-app.use('/usuarios', require('./routes/usuarios'));
-=======
-// Adicione aqui as rotas do projeto.
 app.use('/cursos', require('./routes/cursos'));
+app.use('/turmas', require('./routes/turmas'));
 app.use('/matriculas', require('./routes/matriculas'));
->>>>>>> cce969ea37ec398e318e8c02f0e208bdfd977e99
+app.use('/usuarios', require('./routes/usuarios'));
 
 const PORT = process.env.PORT || 3000;
 

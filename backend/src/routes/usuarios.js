@@ -1,10 +1,13 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const pool = require('../db');
+const autenticar = require('../middlewares/autenticar');
+const permitir = require('../middlewares/permitir');
 
 const router = express.Router();
 
-// Lista os funcionários sem devolver a senha criptografada.
+router.use(autenticar, permitir('coordenacao'));
+
 router.get('/', async (req, res) => {
   try {
     const [usuarios] = await pool.query(
@@ -20,7 +23,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Cadastra um novo funcionário.
 router.post('/', async (req, res) => {
   const { nome, email, senha, telefone, perfil_id } = req.body;
 
@@ -51,7 +53,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Desativa um funcionário sem apagá-lo do histórico.
 router.patch('/:id/desativar', async (req, res) => {
   try {
     const [resultado] = await pool.query(
